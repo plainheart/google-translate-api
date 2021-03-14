@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc ava",
-    "release": "npm test && npm version $VER && npm publish",
+    "release": "npm test && npm version $VER && npm publish --access public",
     "postrelease": "git push --follow-tags --no-verify",
     "release-patch": "VER=patch npm run release",
     "release-minor": "VER=minor npm run release"
