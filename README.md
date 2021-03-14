@@ -1,6 +1,8 @@
 # google-translate-api
 [![Actions Status](https://github.com/plainheart/google-translate-api/workflows/autotests/badge.svg)](https://github.com/plainheart/google-translate-api/actions)
 [![NPM version](https://img.shields.io/npm/v/@plainheart/google-translate-api.svg)](https://www.npmjs.com/package/@plainheart/google-translate-api)
+[![NPM Downloads](https://img.shields.io/npm/dm/@plainheart/google-translate-api.svg)](https://npmcharts.com/compare/@plainheart/google-translate-api?minimal=true)
+[![License](https://img.shields.io/npm/l/@plainheart/google-translate-api.svg)](https://www.npmjs.com/package/@plainheart/google-translate-api)
 
 A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: for Node.js.
 
