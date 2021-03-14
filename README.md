@@ -182,6 +182,7 @@ The got options: https://github.com/sindresorhus/got#options
 
 ### Returns an `object`:
 - `text` *(string)* – The translated text.
+- `pronunciation` *(string)* – The pronunciation of translated text.
 - `from` *(object)*
   - `language` *(object)*
     - `didYouMean` *(boolean)* - `true` if the API suggest a correction in the source language
@@ -190,7 +191,7 @@ The got options: https://github.com/sindresorhus/got#options
     - `autoCorrected` *(boolean)* – `true` if the API has auto corrected the `text`
     - `value` *(string)* – The auto corrected `text` or the `text` with suggested corrections
     - `didYouMean` *(boolean)* – `true` if the API has suggested corrections to the `text`
-- `raw` *(string)* - If `options.raw` is true, the raw response from Google Translate servers. Otherwise, `''`.
+- `raw` *(string|object)* - If `options.raw` is true, the raw response from Google Translate servers..
 
 Note that `res.from.text` will only be returned if `from.text.autoCorrected` or `from.text.didYouMean` equals to `true`. In this case, it will have the corrections delimited with brackets (`[ ]`):
 

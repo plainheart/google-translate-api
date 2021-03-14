@@ -1,14 +1,21 @@
 export = googleTranslateApi;
 
 declare function googleTranslateApi(
-  query: string,
-  opts?: googleTranslateApi.IOptions
+  text: string,
+  options?: googleTranslateApi.IOptions,
+  gotOptions?: any
 ): Promise<googleTranslateApi.ITranslateResponse>;
 
 declare namespace googleTranslateApi {
   export interface IOptions {
     from?: string;
     to?: string;
+    raw?: boolean;
+    client?: 't'|'gtx';
+    tld?: string;
+    endpoints?: ('website' | 'dictExt' | 'api')[];
+    randomEndpoint?: boolean;
+    endpointFallback?: boolean;
   }
 
   export interface ITranslateLanguage {
@@ -29,7 +36,7 @@ declare namespace googleTranslateApi {
       language: ITranslateLanguage;
       text: ITranslateText;
     };
-    raw: string;
+    raw: string | object;
   }
 
   export enum languages {
