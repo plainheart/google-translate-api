@@ -6,7 +6,7 @@
  * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
  */
 
-var langs = {
+const langs = {
     'auto': 'Automatic',
     'af': 'Afrikaans',
     'sq': 'Albanian',
@@ -128,7 +128,7 @@ function getCode(desiredLang) {
         return desiredLang;
     }
 
-    var keys = Object.keys(langs).filter(function (key) {
+    const keys = Object.keys(langs).filter(function (key) {
         if (typeof langs[key] !== 'string') {
             return false;
         }

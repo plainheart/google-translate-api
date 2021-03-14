@@ -1,11 +1,10 @@
 {
-  "name": "@vitalets/google-translate-api",
-  "version": "5.0.0",
+  "name": "@plainheart/google-translate-api",
+  "version": "1.0.0",
   "description": "A free and unlimited API for Google Translate",
   "main": "index.js",
   "scripts": {
-    "test": "xo && nyc ava",
-    "coverage": "nyc report --reporter=text-lcov | coveralls && nyc report --reporter=text-lcov > coverage.lcov && codecov",
+    "test": "nyc ava",
     "release": "npm test && npm version $VER && npm publish",
     "postrelease": "git push --follow-tags --no-verify",
     "release-patch": "VER=patch npm run release",
@@ -13,13 +12,12 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "xo",
       "pre-push": "npm test"
     }
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vitalets/google-translate-api.git"
+    "url": "https://github.com/plainheart/google-translate-api.git"
   },
   "keywords": [
     "translate",
@@ -37,25 +35,18 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/vitalets/google-translate-api/issues"
+    "url": "https://github.com/plainheart/google-translate-api/issues"
   },
-  "homepage": "https://github.com/vitalets/google-translate-api#readme",
+  "homepage": "https://github.com/plainheart/google-translate-api#readme",
   "dependencies": {
     "configstore": "^5.0.1",
-    "got": "^9.6.0"
+    "got": "^9.6.0",
+    "lodash.clonedeep": "^4.5.0"
   },
   "devDependencies": {
     "ava": "^3.15.0",
-    "codecov": "^3.8.1",
-    "coveralls": "^2.11.11",
+    "hpagent": "^0.1.1",
     "husky": "^3.0.4",
-    "nyc": "^15.1.0",
-    "xo": "^0.16.0"
-  },
-  "xo": {
-    "space": 4,
-    "parserOptions": {
-      "ecmaScript": 7
-    }
+    "nyc": "^15.1.0"
   }
 }
