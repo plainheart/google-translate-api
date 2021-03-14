@@ -1,8 +1,6 @@
 # google-translate-api
-[![Actions Status](https://github.com/vitalets/google-translate-api/workflows/autotests/badge.svg)](https://github.com/vitalets/google-translate-api/actions)
-[![NPM version](https://img.shields.io/npm/v/@vitalets/google-translate-api.svg)](https://www.npmjs.com/package/@vitalets/google-translate-api)
-[![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
-[![Coverage Status](https://coveralls.io/repos/github/vitalets/google-translate-api/badge.svg?branch=master)](https://coveralls.io/github/vitalets/google-translate-api?branch=master)
+[![Actions Status](https://github.com/plainheart/google-translate-api/workflows/autotests/badge.svg)](https://github.com/plainheart/google-translate-api/actions)
+[![NPM version](https://img.shields.io/npm/v/@plainheart/google-translate-api.svg)](https://www.npmjs.com/package/@plainheart/google-translate-api)
 
 A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: for Node.js.
 
@@ -12,25 +10,19 @@ A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: f
 - Spelling correction
 - Language correction 
 - Fast and reliable – it uses the same servers that [translate.google.com](https://translate.google.com) uses
+- Multiple endpoints
 
 ## Why this fork?
-This fork of original [matheuss/google-translate-api](https://github.com/matheuss/google-translate-api) contains several improvements:
+This fork of original [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements:
 
-- New option `client="t|gtx"`. Setting `client="gtx"` seems to work even with outdated token, see [this discussion](https://github.com/matheuss/google-translate-api/issues/79#issuecomment-425679193) for details
-- Fixed extraction of TKK ceed from current `https://translate.google.com` sources (via [@vitalets/google-translate-token](https://github.com/vitalets/google-translate-token))
-- Removed unsecure `unsafe-eval` dependency (See [#2](https://github.com/vitalets/google-translate-api/pull/2))
-- Added [daily CI tests](https://travis-ci.org/vitalets/google-translate-api/builds) to get notified if Google API changes
-- Added support for custom `tld` (especially to support `translate.google.cn`, see [#7](https://github.com/vitalets/google-translate-api/pull/7))
-- Added support for outputting pronunciation (see [#17](https://github.com/vitalets/google-translate-api/pull/17))
-- Added support for custom [got](https://github.com/sindresorhus/got) options. It allows to use proxy and bypass request limits (see [#25](https://github.com/vitalets/google-translate-api/pull/25))
-- Added support for language extensions from outside of the API (see [#18](https://github.com/vitalets/google-translate-api/pull/18))
-- Added TypeScript definitions (see [#50](https://github.com/vitalets/google-translate-api/pull/50), thanks to [@olavoparno](https://github.com/olavoparno))
-- Migrated to Google's latest batch-style RPC API (see [#60](https://github.com/vitalets/google-translate-api/pull/60), thanks to [@vkedwardli](https://github.com/vkedwardli))
+- Added support for specifying the endpoints to be used.
+- Added support for random endpoint and endpoint fallback.  
+- Added two new endpoints `dictExt`(dict-chrome-ex) & `api`(translate.googleapis.com).
 
 ## Install 
 
 ```
-npm install @vitalets/google-translate-api
+npm install @plainheart/google-translate-api
 ```
 
 ## Usage
@@ -38,7 +30,7 @@ npm install @vitalets/google-translate-api
 From automatic language detection to English:
 
 ```js
-const translate = require('@vitalets/google-translate-api');
+const translate = require('@plainheart/google-translate-api');
 
 translate('Ik spreek Engels', {to: 'en'}).then(res => {
     console.log(res.text);
@@ -56,7 +48,7 @@ translate('Ik spreek Engels', {to: 'en'}).then(res => {
 From English to Dutch with a typo:
 
 ```js
-translate('I spea Dutch!', {from: 'en', to: 'nl'}).then(res => {
+translate('I spea Dutch!', {from: 'en', to: 'nl', endpoints: ['website']}).then(res => {
     console.log(res.text);
     //=> Ik spreek Nederlands!
     console.log(res.from.text.autoCorrected);
@@ -73,7 +65,7 @@ translate('I spea Dutch!', {from: 'en', to: 'nl'}).then(res => {
 Sometimes, the API will not use the auto corrected text in the translation:
 
 ```js
-translate('I spea Dutch!', {from: 'en', to: 'nl'}).then(res => {
+translate('I spea Dutch!', {from: 'en', to: 'nl', endpoints: ['website']}).then(res => {
     console.log(res);
     console.log(res.text);
     //=> Ik spea Nederlands!
@@ -140,12 +132,12 @@ Type: `object`
 ##### from
 Type: `string` Default: `auto`
 
-The `text` language. Must be `auto` or one of the codes/names (not case sensitive) contained in [languages.js](https://github.com/vitalets/google-translate-api/blob/master/languages.js)
+The `text` language. Must be `auto` or one of the codes/names (not case sensitive) contained in [languages.js](https://github.com/plainheart/google-translate-api/blob/master/languages.js)
 
 ##### to
 Type: `string` Default: `en`
 
-The language in which the text should be translated. Must be one of the codes/names (case sensitive!) contained in [languages.js](https://github.com/vitalets/google-translate-api/blob/master/languages.js).
+The language in which the text should be translated. Must be one of the codes/names (case sensitive!) contained in [languages.js](https://github.com/plainheart/google-translate-api/blob/master/languages.js).
 
 ##### raw
 Type: `boolean` Default: `false`
@@ -157,10 +149,29 @@ Type: `string` Default: `"t"`
 
 Query parameter `client` used in API calls. Can be `t|gtx`.
 
+Note that this option only works for `website` endpoint.
+
 ##### tld
 Type: `string` Default: `"com"`
 
 TLD for Google translate host to be used in API calls: `https://translate.google.{tld}`.
+
+Note that this option only works for `website` endpoint.
+
+##### endpoints
+Type: `Array<string>` Default: `['website', 'dictExt', 'api']`
+
+The translation endpoints. Can be `website|dictExt|api`.
+
+##### randomEndpoint
+Type: `boolean` Default: `false`
+
+Whether to use a random endpoint.
+
+##### endpointFallback
+Type: `boolean` Default: `true`
+
+If `true`, will try the next endpoint automatically when current endpoint failed.
 
 #### gotOptions
 Type: `object`
@@ -172,7 +183,7 @@ The got options: https://github.com/sindresorhus/got#options
 - `from` *(object)*
   - `language` *(object)*
     - `didYouMean` *(boolean)* - `true` if the API suggest a correction in the source language
-    - `iso` *(string)* - The [code of the language](https://github.com/vitalets/google-translate-api/blob/master/languages.js) that the API has recognized in the `text`
+    - `iso` *(string)* - The [code of the language](https://github.com/plainheart/google-translate-api/blob/master/languages.js) that the API has recognized in the `text`
   - `text` *(object)*
     - `autoCorrected` *(boolean)* – `true` if the API has auto corrected the `text`
     - `value` *(string)* – The auto corrected `text` or the `text` with suggested corrections
@@ -182,7 +193,7 @@ The got options: https://github.com/sindresorhus/got#options
 Note that `res.from.text` will only be returned if `from.text.autoCorrected` or `from.text.didYouMean` equals to `true`. In this case, it will have the corrections delimited with brackets (`[ ]`):
 
 ```js
-translate('I spea Dutch').then(res => {
+translate('I spea Dutch', { endpoints: ['website'] }).then(res => {
     console.log(res.from.text.value);
     //=> I [speak] Dutch
 }).catch(err => {
@@ -193,4 +204,4 @@ Otherwise, it will be an empty `string` (`''`).
 
 ## License
 
-MIT © [Matheus Fernandes](http://matheus.top), forked and maintained by [Vitaliy Potapov](https://github.com/vitalets).
+MIT © [Vitaliy Potapov](https://github.com/vitalets), forked and maintained by [plainheart](https://github.com/plainheart).
