@@ -9,6 +9,7 @@ on:
       - master
   schedule:
     - cron: '0 3 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -17,15 +18,18 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12, 14]
+        node-version: [12]
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: install deps and run tests
-      run: |
-        npm ci
-        npm test
+      - name: Check out
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Intsall deps & Run tests
+        run: |
+          npm ci
+          npm test
