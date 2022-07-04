@@ -59,8 +59,10 @@ const langs = {
     'kn': 'Kannada',
     'kk': 'Kazakh',
     'km': 'Khmer',
+    'rw': 'Kinyarwanda',
     'ko': 'Korean',
     'ku': 'Kurdish (Kurmanji)',
+    'ckb': 'Kurdish (Sorani)',
     'ky': 'Kyrgyz',
     'lo': 'Lao',
     'la': 'Latin',
@@ -78,6 +80,7 @@ const langs = {
     'my': 'Myanmar (Burmese)',
     'ne': 'Nepali',
     'no': 'Norwegian',
+    'or': 'Odia (Oriya)',
     'ps': 'Pashto',
     'fa': 'Persian',
     'pl': 'Polish',
@@ -101,11 +104,14 @@ const langs = {
     'sv': 'Swedish',
     'tg': 'Tajik',
     'ta': 'Tamil',
+    'tt': 'Tatar',
     'te': 'Telugu',
     'th': 'Thai',
     'tr': 'Turkish',
+    'tk': 'Turkmen',
     'uk': 'Ukrainian',
     'ur': 'Urdu',
+    'ug': 'Uyghur',
     'uz': 'Uzbek',
     'vi': 'Vietnamese',
     'cy': 'Welsh',
@@ -114,6 +120,7 @@ const langs = {
     'yo': 'Yoruba',
     'zu': 'Zulu'
 };
+
 /**
  * Returns the ISO 639-1 code of the desiredLang – if it is supported by Google Translate
  * @param {string} desiredLang – the name or the code(case sensitive) of the desired language
