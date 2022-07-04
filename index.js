@@ -1,9 +1,5 @@
-const querystring = require('querystring');
-
 const got = require('got');
-
 const deepClone = require('lodash.clonedeep');
-
 const languages = require('./languages');
 
 const ENDPOINT_MAP = {};
@@ -36,8 +32,9 @@ ENDPOINT_MAP.website = async function(text, opts, gotopts) {
         'rt': 'c'
     };
 
-    url += '/_/TranslateWebserverUi/data/batchexecute?' + querystring.stringify(data);
+    url += '/_/TranslateWebserverUi/data/batchexecute';
 
+    gotopts.searchParams = data;
     gotopts.body = 'f.req=' + encodeURIComponent(JSON.stringify([[['MkEWBc', JSON.stringify([[text, opts.from, opts.to, true], [null]]), null, 'generic']]])) + '&';
     gotopts.headers['content-type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
 
@@ -116,15 +113,20 @@ ENDPOINT_MAP.website = async function(text, opts, gotopts) {
 ENDPOINT_MAP.dictExt = async function(text, opts, gotopts) {
     gotopts = deepClone(gotopts);
 
-    const query = {
-        'client': 'dict-chrome-ex',
-        'sl': opts.from,
-        'tl': opts.to,
-        'q': text
-    };
-    const url = 'https://clients' + (~~(Math.random() * 5) + 1) + '.google.com/translate_a/t?' + querystring.stringify(query);
-    gotopts.json = true;
-    const { body: res } = await got(url, gotopts);
+    const query = new URLSearchParams([
+        ['client', 'dict-chrome-ex'],
+        ['sl', opts.from],
+        ['tl', opts.to],
+        ['q', text],
+        ['dj', 1],
+        ['dt', 't'],
+        ['dt', 'sp'],
+        ['dt', 'ld'],
+        ['dt', 'bd']
+    ]);
+    const url = 'https://clients' + (~~(Math.random() * 5) + 1) + '.google.com/translate_a/single';
+    gotopts.searchParams = query;
+    const res = await got(url, gotopts).json();
     return {
         text: res.sentences.map(r => r.trans).join(''),
         pronunciation: res.sentences[res.sentences.length - 1].src_translit,
@@ -154,10 +156,10 @@ ENDPOINT_MAP.api = async function(text, opts, gotopts) {
         'tl': opts.to,
         'q': text
     };
-    const url = 'https://translate.googleapis.com/translate_a/single?' + querystring.stringify(query);
-    gotopts.json = true;
+    const url = 'https://translate.googleapis.com/translate_a/single';
+    gotopts.searchParams = query;
 
-    const { body: res } = await got(url, gotopts);
+    const res = await got(url, gotopts).json();
     return {
         text: res[0].map(r => r[0]).join(''),
         // not supported
