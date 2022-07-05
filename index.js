@@ -4,7 +4,7 @@ const languages = require('./languages');
 
 const ENDPOINT_MAP = {};
 
-const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36';
+const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36';
 
 function extract(key, res) {
     const re = new RegExp(`"${key}":".*?"`);
@@ -20,8 +20,10 @@ ENDPOINT_MAP.website = async function(text, opts, gotopts) {
 
     let url = 'https://translate.google.' + opts.tld;
     let res = await got(url, gotopts);
+    const rpcids = 'MkEWBc';
     const data = {
-        'rpcids': 'MkEWBc',
+        'rpcids': rpcids,
+        'source-path': '/',
         'f.sid': extract('FdrFJe', res),
         'bl': extract('cfb2h', res),
         'hl': 'en-US',
@@ -35,7 +37,7 @@ ENDPOINT_MAP.website = async function(text, opts, gotopts) {
     url += '/_/TranslateWebserverUi/data/batchexecute';
 
     gotopts.searchParams = data;
-    gotopts.body = 'f.req=' + encodeURIComponent(JSON.stringify([[['MkEWBc', JSON.stringify([[text, opts.from, opts.to, true], [null]]), null, 'generic']]])) + '&';
+    gotopts.body = 'f.req=' + encodeURIComponent(JSON.stringify([[[rpcids, JSON.stringify([[text, opts.from, opts.to, true], [null]]), null, 'generic']]])) + '&';
     gotopts.headers['content-type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
 
     res = await got.post(url, gotopts);
@@ -80,7 +82,7 @@ ENDPOINT_MAP.website = async function(text, opts, gotopts) {
             }
         });
     }
-    result.pronunciation = json[1][0][0][1];
+    result.pronunciation = json[0][0];
 
     // From language
     if (json[0] && json[0][1] && json[0][1][1]) {
