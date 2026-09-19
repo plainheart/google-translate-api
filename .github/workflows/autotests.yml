@@ -1,35 +1,37 @@
-name: autotests
+name: Auto Test
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
   schedule:
     - cron: '0 3 * * *'
+  push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
-  build:
-
+  autotest:
+    if: ${{ github.repository_owner == 'plainheart' }}
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [12]
-
     steps:
-      - name: Check out
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - name: Cache node modules
+        id: cache
+        uses: actions/cache@v6
         with:
-          node-version: ${{ matrix.node-version }}
+          path: '**/node_modules'
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Intsall deps & Run tests
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Add random delay (Only for scheduled runs)
+        if: github.event_name == 'schedule'
         run: |
-          npm ci
-          npm test
+          DELAY=$((1 + RANDOM % 600))
+          echo "Scheduled run detected. Waiting for $DELAY seconds..."
+          sleep $DELAY
+
+      - name: Run tests
+        run: npm run test
