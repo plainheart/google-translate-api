@@ -1,42 +1,31 @@
+import {type Options as GotOptions} from 'got';
+
 export = googleTranslateApi;
 
 declare function googleTranslateApi(
   text: string,
   options?: googleTranslateApi.IOptions,
-  gotOptions?: any
+  gotOptions?: GotOptions
 ): Promise<googleTranslateApi.ITranslateResponse>;
 
 declare namespace googleTranslateApi {
+  export type ENDPOINT = 'chrome' | 'api' | 'dictExt' | 'website';
+
   export interface IOptions {
     from?: string;
     to?: string;
     raw?: boolean;
-    client?: 't'|'gtx';
     tld?: string;
-    endpoints?: ('website' | 'dictExt' | 'api')[];
+    endpoints?: ENDPOINT[];
     randomEndpoint?: boolean;
     endpointFallback?: boolean;
   }
 
-  export interface ITranslateLanguage {
-    didYouMean: boolean;
-    iso: string;
-  }
-
-  export interface ITranslateText {
-    autoCorrected: boolean;
-    value: string;
-    didYouMean: boolean;
-  }
-
   export interface ITranslateResponse {
     text: string;
-    pronunciation?: string;
-    from: {
-      language: ITranslateLanguage;
-      text: ITranslateText;
-    };
-    raw: string | object;
+    from?: keyof typeof languages;
+    raw?: string | object;
+    endpoint: ENDPOINT;
   }
 
   export enum languages {

@@ -1,10 +1,15 @@
+/**
+ * @import {Got} from 'got'
+ *
+ * @import googleTranslateApi from './index'
+ */
+
+/** @type {Got} */
 const got = require('got');
 const deepClone = require('lodash.clonedeep');
 const languages = require('./languages');
 
-const ENDPOINT_MAP = {};
-
-const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36';
+const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36';
 
 function extract(key, res) {
     const re = new RegExp(`"${key}":".*?"`);
@@ -15,7 +20,10 @@ function extract(key, res) {
     return '';
 }
 
-ENDPOINT_MAP.website = async function(text, opts, gotopts) {
+/**
+ * @type {typeof googleTranslateApi}
+ */
+const website = async function(text, opts, gotopts) {
     gotopts = deepClone(gotopts);
 
     let url = 'https://translate.google.' + opts.tld;
@@ -43,34 +51,16 @@ ENDPOINT_MAP.website = async function(text, opts, gotopts) {
     res = await got.post(url, gotopts);
 
     let json = res.body.slice(6);
-    let length = '';
+    const length = /^\d+/.exec(json)[0];
+    json = JSON.parse(json.slice(length.length, parseInt(length, 10) + length.length));
+    json = JSON.parse(json[0][2]);
 
     const result = {
         text: '',
-        pronunciation: void 0,
-        from: {
-            language: {
-                didYouMean: false,
-                iso: ''
-            },
-            text: {
-                autoCorrected: false,
-                value: '',
-                didYouMean: false
-            }
-        },
+        from: void 0,
         raw: void 0,
         endpoint: 'website'
     };
-
-    try {
-        length = /^\d+/.exec(json)[0];
-        json = JSON.parse(json.slice(length.length, parseInt(length, 10) + length.length));
-        json = JSON.parse(json[0][2]);
-        opts.raw && (result.raw = json);
-    } catch (e) {
-        return result;
-    }
 
     if (json[1][0][0][5] == null) {
         // translation not found, could be a hyperlink or gender-specific translation?
@@ -82,37 +72,25 @@ ENDPOINT_MAP.website = async function(text, opts, gotopts) {
             }
         });
     }
-    result.pronunciation = json[0][0];
 
     // From language
     if (json[0] && json[0][1] && json[0][1][1]) {
-        result.from.language.didYouMean = true;
-        result.from.language.iso = json[0][1][1][0];
+        result.from = json[0][1][1][0];
     } else if (json[1][3] === 'auto') {
-        result.from.language.iso = json[2];
+        result.from = json[2];
     } else {
-        result.from.language.iso = json[1][3];
+        result.from = json[1][3];
     }
 
-    // Did you mean & autocorrect
-    if (json[0] && json[0][1] && json[0][1][0]) {
-        const str = json[0][1][0][0][1]
-            .replace(/<b>(<i>)?/g, '[')
-            .replace(/(<\/i>)?<\/b>/g, ']');
-
-        result.from.text.value = str;
-
-        if (json[0][1][0][2] === 1) {
-            result.from.text.autoCorrected = true;
-        } else {
-            result.from.text.didYouMean = true;
-        }
-    }
+    opts.raw && (result.raw = json);
 
     return result;
 };
 
-ENDPOINT_MAP.dictExt = async function(text, opts, gotopts) {
+/**
+ * @type {typeof googleTranslateApi}
+ */
+const dictExt = async function(text, opts, gotopts) {
     gotopts = deepClone(gotopts);
 
     const query = new URLSearchParams([
@@ -131,24 +109,16 @@ ENDPOINT_MAP.dictExt = async function(text, opts, gotopts) {
     const res = await got(url, gotopts).json();
     return {
         text: res.sentences.map(r => r.trans).join(''),
-        pronunciation: res.sentences[res.sentences.length - 1].src_translit,
-        from: {
-            language: {
-                didYouMean: false,
-                iso: res.src
-            },
-            text: {
-                autoCorrected: false,
-                value: res.sentences.map(r => r.orig).join(''),
-                didYouMean: false
-            }
-        },
+        from: res.src,
         raw: opts.raw && res,
         endpoint: 'dictExt'
     };
 };
 
-ENDPOINT_MAP.api = async function(text, opts, gotopts) {
+/**
+ * @type {typeof googleTranslateApi}
+ */
+const api = async function (text, opts, gotopts) {
     gotopts = deepClone(gotopts);
 
     const query = {
@@ -164,25 +134,42 @@ ENDPOINT_MAP.api = async function(text, opts, gotopts) {
     const res = await got(url, gotopts).json();
     return {
         text: res[0].map(r => r[0]).join(''),
-        // not supported
-        pronunciation: void 0,
-        from: {
-            language: {
-                didYouMean: false,
-                iso: res[2]
-            },
-            text: {
-                autoCorrected: false,
-                value: res[0].map(r => r[1]).join(''),
-                didYouMean: false
-            }
-        },
+        from: res[2],
         raw: opts.raw && res,
         endpoint: 'api'
     };
 };
 
-async function translate(text, opts, gotopts) {
+/**
+ * @type {typeof googleTranslateApi}
+ * @param {string | string[]} text
+ */
+const chrome = async function(text, opts, gotopts) {
+    gotopts = deepClone(gotopts);
+
+    const url = 'https://translate-pa.googleapis.com/v1/translateHtml';
+    const isMulti = Array.isArray(text);
+    gotopts.body = JSON.stringify([
+        [isMulti ? text : [text], opts.from, opts.to],
+        'te_lib'
+    ]);
+    const headers = gotopts.headers ||= {};
+    headers['content-type'] = 'application/json+protobuf';
+    headers['x-goog-api-key'] = 'AIzaSyATBXajvzQLTDHEQbcpq0Ihe0vWDHmO520';
+    headers['referer'] = 'https://google.com/';
+    const res = await got.post(url, gotopts).json();
+    return {
+        text: isMulti ? res[0] : res[0].join(''),
+        from: res[1] && res[1][0] || opts.from,
+        raw: opts.raw && res,
+        endpoint: 'chrome'
+    };
+}
+
+/**
+ * @type {typeof googleTranslateApi}
+ */
+const translate = async function(text, opts, gotopts) {
     opts = opts || {};
     gotopts = gotopts || {};
 
@@ -206,6 +193,7 @@ async function translate(text, opts, gotopts) {
     opts.from = languages.getCode(opts.from);
     opts.to = languages.getCode(opts.to);
 
+    const ENDPOINT_MAP = /** @const */ ({ chrome, api, dictExt, website });
     const allEndpoints = Object.keys(ENDPOINT_MAP);
     let endpoints = opts.endpoints;
     if (!endpoints || !endpoints.length || !Array.isArray(endpoints)) {

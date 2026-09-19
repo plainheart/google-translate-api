@@ -6,7 +6,7 @@
  * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
  */
 
-const langs = {
+const langs = /** @type {const} */ ({
     'auto': 'Automatic',
     'af': 'Afrikaans',
     'sq': 'Albanian',
@@ -119,31 +119,32 @@ const langs = {
     'yi': 'Yiddish',
     'yo': 'Yoruba',
     'zu': 'Zulu'
-};
+});
 
 /**
  * Returns the ISO 639-1 code of the desiredLang – if it is supported by Google Translate
  * @param {string} desiredLang – the name or the code(case sensitive) of the desired language
- * @returns {string|boolean} The ISO 639-1 code of the language or false if the language is not supported
+ * @returns {string|undefined} The ISO 639-1 code of the language or false if the language is not supported
  */
 function getCode(desiredLang) {
-    if (!desiredLang) {
-        return false;
+    if (!desiredLang || typeof desiredLang !== 'string') {
+        return;
     }
 
     if (langs[desiredLang]) {
         return desiredLang;
     }
 
-    const keys = Object.keys(langs).filter(function (key) {
-        if (typeof langs[key] !== 'string') {
-            return false;
+    desiredLang = desiredLang.toLowerCase();
+
+    const supportedLangCodes = Object.keys(langs);
+
+    for (let i = 0, len = supportedLangCodes.length, code; i < len; i++) {
+        code = supportedLangCodes[i];
+        if (code.toLowerCase() === desiredLang || langs[code].toLowerCase() === desiredLang) {
+            return code;
         }
-
-        return langs[key].toLowerCase() === desiredLang.toLowerCase();
-    });
-
-    return keys[0] || false;
+    }
 }
 
 /**
@@ -152,7 +153,7 @@ function getCode(desiredLang) {
  * @returns {boolean}
  */
 function isSupported(desiredLang) {
-    return Boolean(getCode(desiredLang));
+    return !!getCode(desiredLang);
 }
 
 module.exports = langs;
